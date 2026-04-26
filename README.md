@@ -1,6 +1,6 @@
 # FraudGuard — Financial Fraud Detection Pipeline
 
-[![CI](https://github.com/<your-username>/fraudguard/actions/workflows/test.yml/badge.svg)](https://github.com/<your-username>/fraudguard/actions/workflows/test.yml) [![Tests](https://img.shields.io/badge/tests-101%20passed-brightgreen)](tests/) [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](requirements.txt) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](src/api.py)
+[![CI](https://github.com/<chapranishika>/fraudguard/actions/workflows/test.yml/badge.svg)](https://github.com/<chapranishika>/fraudguard/actions/workflows/test.yml) [![Tests](https://img.shields.io/badge/tests-101%20passed-brightgreen)](tests/) [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](requirements.txt) [![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688)](src/api.py)
 
 End-to-end financial fraud detection on the **PaySim** synthetic transactions dataset (1M rows, 1:1868 class imbalance). Covers domain-driven feature engineering, Bayesian hyperparameter optimisation (Optuna), probability calibration, async FastAPI inference with SHAP explainability, model versioning with hash-linked registry, drift detection, velocity feature schema intelligence, and 101 tests enforced by GitHub Actions CI on Python 3.11 + 3.12.
 
@@ -117,7 +117,7 @@ Fraud in PaySim follows a specific pattern: accounts are drained entirely (sende
 ### 1. Set up
 
 ```bash
-git clone https://github.com/<your-username>/fraudguard.git
+git clone https://github.com/<chapranishika>/fraudguard.git
 cd fraudguard
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
