@@ -1,0 +1,25 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.pytest_cache/
+.DS_Store
+
+# Model artifacts — never commit binaries
+*.pkl
+models/*.pkl
+
+# Databases
+*.db
+*.sqlite
+
+# Datasets — large files, excluded from version control
+creditcard.csv
+paysim_sample.csv
+Synthetic_Financial_datasets_log.csv
+
+# Jupyter
+.ipynb_checkpoints/

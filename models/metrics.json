@@ -1,0 +1,184 @@
+{
+  "dataset": "paysim_sample.csv",
+  "data_hash": "4cd0843e48c7",
+  "trained_at": "2026-04-26T23:05:16.554749+00:00",
+  "best_model": "XGBoost (tuned)",
+  "selection_criterion": "pr_auc",
+  "feature_names": [
+    "amount",
+    "oldbalanceOrg",
+    "newbalanceOrig",
+    "oldbalanceDest",
+    "newbalanceDest",
+    "balance_delta_orig",
+    "balance_delta_dest",
+    "balance_zero_orig",
+    "balance_zero_dest",
+    "orig_tx_count_so_far",
+    "orig_amount_sum_so_far",
+    "step",
+    "type_CASH_IN",
+    "type_CASH_OUT",
+    "type_DEBIT",
+    "type_PAYMENT",
+    "type_TRANSFER"
+  ],
+  "model_filename": "model_4cd0843e48c7.pkl",
+  "scaler_filename": "scaler_4cd0843e48c7.pkl",
+  "explainer_filename": "explainer_4cd0843e48c7.pkl",
+  "total_transactions": 1000000,
+  "fraud_count": 535,
+  "fraud_pct": 0.0535,
+  "optuna_tuning": {
+    "n_trials": 20,
+    "best_trial_score": 0.0627,
+    "best_params": {
+      "learning_rate": 0.14020227708293684,
+      "max_depth": 8,
+      "subsample": 0.8158056299055848,
+      "colsample_bytree": 0.8996788716171967
+    },
+    "all_trial_scores": [
+      0.0627,
+      0.0603,
+      0.06,
+      0.0593,
+      0.0583,
+      0.0579,
+      0.0571,
+      0.0568,
+      0.0568,
+      0.0565,
+      0.0559,
+      0.0544,
+      0.053,
+      0.0346,
+      0.0334,
+      0.0329,
+      0.0229,
+      0.0156,
+      0.0114,
+      0.0074
+    ]
+  },
+  "cross_validation": {
+    "n_folds": 5,
+    "fold_scores": [
+      0.0589,
+      0.0437,
+      0.0829,
+      0.0674,
+      0.0604
+    ],
+    "mean_pr_auc": 0.0627,
+    "std_pr_auc": 0.0128,
+    "params_used": {
+      "n_estimators": 300,
+      "learning_rate": 0.14020227708293684,
+      "max_depth": 8,
+      "subsample": 0.8158056299055848,
+      "colsample_bytree": 0.8996788716171967,
+      "eval_metric": "logloss",
+      "random_state": 42,
+      "n_jobs": -1
+    },
+    "pipeline": "ADASYN \u2192 StandardScaler \u2192 XGBClassifier (inside each fold)"
+  },
+  "comparison": {
+    "RandomForest": {
+      "roc_auc": 0.6466,
+      "pr_auc": 0.0455,
+      "precision": 0.0013,
+      "recall": 0.3458,
+      "f1": 0.0026,
+      "confusion_matrix": [
+        [
+          171904,
+          27989
+        ],
+        [
+          70,
+          37
+        ]
+      ]
+    },
+    "XGBoost (tuned)": {
+      "roc_auc": 0.6257,
+      "pr_auc": 0.0812,
+      "precision": 0.0041,
+      "recall": 0.1682,
+      "f1": 0.008,
+      "confusion_matrix": [
+        [
+          195507,
+          4386
+        ],
+        [
+          89,
+          18
+        ]
+      ],
+      "roc_auc_calibrated": 0.6236,
+      "pr_auc_calibrated": 0.0709,
+      "precision_calibrated": 0.0027,
+      "recall_calibrated": 0.1963,
+      "f1_calibrated": 0.0054
+    },
+    "LightGBM": {
+      "roc_auc": 0.6519,
+      "pr_auc": 0.0314,
+      "precision": 0.0059,
+      "recall": 0.2336,
+      "f1": 0.0114,
+      "confusion_matrix": [
+        [
+          195647,
+          4246
+        ],
+        [
+          82,
+          25
+        ]
+      ]
+    }
+  },
+  "global_shap": {
+    "amount": 0.5036161541938782,
+    "oldbalanceOrg": 0.8193044066429138,
+    "newbalanceOrig": 0.38178789615631104,
+    "oldbalanceDest": 0.4611363112926483,
+    "newbalanceDest": 0.3821225166320801,
+    "balance_delta_orig": 0.428017258644104,
+    "balance_delta_dest": 0.7576311230659485,
+    "balance_zero_orig": 0.03866295889019966,
+    "balance_zero_dest": 0.08682098984718323,
+    "orig_tx_count_so_far": 0.009851091541349888,
+    "orig_amount_sum_so_far": 0.2843177020549774,
+    "step": 2.1591851711273193,
+    "type_CASH_IN": 0.2309260070323944,
+    "type_CASH_OUT": 0.6419499516487122,
+    "type_DEBIT": 0.025310292840003967,
+    "type_PAYMENT": 0.058104902505874634,
+    "type_TRANSFER": 0.1662997156381607
+  },
+  "roc_auc": 0.6257,
+  "pr_auc": 0.0812,
+  "precision": 0.0041,
+  "recall": 0.1682,
+  "f1": 0.008,
+  "confusion_matrix": [
+    [
+      195507,
+      4386
+    ],
+    [
+      89,
+      18
+    ]
+  ],
+  "roc_auc_calibrated": 0.6236,
+  "pr_auc_calibrated": 0.0709,
+  "precision_calibrated": 0.0027,
+  "recall_calibrated": 0.1963,
+  "f1_calibrated": 0.0054
+}

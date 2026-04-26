@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudGuard Bank Operations System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="system-health-bar">
+        <span class="pulse-indicator"></span>
+        <span id="system-status">SYSTEM ACTIVE — Zero-Trust Protocol Online</span>
+        <span class="health-metrics">Latency: 12ms | Cluster: Stable</span>
+        <div class="mode-switcher" style="display: flex; gap: 0.5rem; margin-right: auto; padding-left: 1rem;">
+            <button id="mode-terminal" class="btn-mode active">Terminal</button>
+            <button id="mode-research" class="btn-mode">Research Lab</button>
+        </div>
+        <button id="theme-toggle">🌗 Toggle Theme</button>
+    </div>
+
+    <header>
+        <h1>FraudGuard Operations Terminal</h1>
+    </header>
+
+    <main id="view-terminal" class="dashboard-grid">
+        <!-- 4-Column KPI Row -->
+        <section class="kpi-row">
+            <div class="card kpi-card">
+                <h3>Transactions Scanned</h3>
+                <p id="kpi-total">0</p>
+            </div>
+            <div class="card kpi-card">
+                <h3>Threats Blocked</h3>
+                <p id="kpi-blocked">0</p>
+                <span class="badge danger" id="kpi-rate">0.0% Rate</span>
+            </div>
+            <div class="card kpi-card">
+                <h3>Model Precision</h3>
+                <p id="kpi-precision">--</p>
+                <span class="badge" id="kpi-f1">F1: --</span>
+            </div>
+            <div class="card kpi-card">
+                <h3>Model Engine</h3>
+                <p id="kpi-model">Ensemble</p>
+                <span class="badge success" id="kpi-auc">PR-AUC: --</span>
+            </div>
+        </section>
+
+        <!-- Double-Pane Analysis View -->
+        <section class="analysis-grid">
+            <!-- Left Pane: Live Feed & Simulator -->
+            <div class="card pane-left">
+                <div class="pane-header">
+                    <h2>Live Risk Feed</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-simulate" class="btn-primary">▶ Run Fraud Check</button>
+                        <button id="btn-batch" class="btn-primary" style="background: var(--text-muted); box-shadow: none;">📂 Batch Upload</button>
+                    </div>
+                </div>
+                
+                <div id="manual-entry-form" style="background: var(--bg-base); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border: 1px solid var(--border);">
+                    <h3 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">Manual Transaction Entry (PaySim schema)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0.8rem;">
+                        <input type="number" id="t-amount" placeholder="Amount (₹)" value="50000" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                        <select id="t-type" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                            <option value="CASH_OUT">CASH_OUT</option>
+                            <option value="TRANSFER" selected>TRANSFER</option>
+                            <option value="PAYMENT">PAYMENT</option>
+                            <option value="CASH_IN">CASH_IN</option>
+                            <option value="DEBIT">DEBIT</option>
+                        </select>
+                        <input type="number" id="t-old-orig" placeholder="Sender opening balance" value="50000" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                        <input type="number" id="t-new-orig" placeholder="Sender closing balance" value="0" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                        <input type="number" id="t-old-dest" placeholder="Recipient opening balance" value="0" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                        <input type="number" id="t-new-dest" placeholder="Recipient closing balance" value="0" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                        <input type="number" id="t-step" placeholder="Step (time)" value="1" min="1" style="padding: 0.4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main);">
+                    </div>
+                    <button id="btn-add-manual" class="btn-primary" style="width: 100%;">+ Add to Queue</button>
+                    <p id="queue-count" style="font-size: 0.8rem; margin-top: 0.5rem; text-align: right; color: var(--text-muted);">Queue: 0/5</p>
+                    <p style="font-size: 0.75rem; color: #64748b; font-style: italic; margin-top: 8px;">Features are real PaySim fields — balance deltas and type encoding match what the model was trained on. Set sender closing balance to 0 + recipient opening balance to 0 + TRANSFER/CASH_OUT type to test high-risk signals.</p>
+                </div>
+
+                <div class="feed-container" id="live-feed">
+                    <!-- Circular buffer rows inserted here -->
+                </div>
+            </div>
+
+            <!-- Right Pane: Explainability & Verdict -->
+            <div class="card pane-right">
+                <h2>Explainability (XAI)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5;">Our Zero-Trust XAI engine decomposes the neural network's decision using SHAP values. Click any transaction in the live feed to generate a forensic breakdown of the exact behavioral patterns that triggered the AI.</p>
+                
+                <div class="verdict-box" id="verdict-box">
+                    <p class="placeholder-text">Awaiting transaction selection...</p>
+                </div>
+                
+                <div id="terminal-ai-text" style="margin-top: 1rem; padding: 1rem; background: rgba(2, 132, 199, 0.1); border-left: 4px solid var(--accent); font-size: 0.9rem; line-height: 1.5; display: none;"></div>
+
+                <h3>PCA Decision Path</h3>
+                <div class="pca-indicators">
+                    <div class="pca-badge" id="pca-v14">Geographic: --</div>
+                    <div class="pca-badge" id="pca-v17">Merchant: --</div>
+                    <div class="pca-badge" id="pca-v4">Velocity: --</div>
+                </div>
+
+                <div id="shap-bar-chart" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- Dynamically populated SHAP bars -->
+                </div>
+
+                <div class="confusion-matrix" style="margin-top: 2rem;">
+                    <div class="cm-cell true-negative">
+                        <div class="cm-value" id="cm-tn">--</div>
+                        <div class="cm-label">Normal & Cleared (True Neg)</div>
+                    </div>
+                    <div class="cm-cell false-positive">
+                        <div class="cm-value" id="cm-fp">--</div>
+                        <div class="cm-label">False Alarm (False Pos)</div>
+                    </div>
+                    <div class="cm-cell false-negative">
+                        <div class="cm-value" id="cm-fn">--</div>
+                        <div class="cm-label">Missed Fraud (False Neg)</div>
+                    </div>
+                    <div class="cm-cell true-positive">
+                        <div class="cm-value" id="cm-tp">--</div>
+                        <div class="cm-label">Threat Blocked (True Pos)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audit Log Panel -->
+        <section class="card audit-panel">
+            <h2>Forensic Audit Log</h2>
+            <div class="table-container">
+                <table id="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp (UTC)</th>
+                            <th>Txn ID (Masked)</th>
+                            <th>Amount</th>
+                            <th>Verdict</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-body">
+                        <!-- Audit rows here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- RESEARCH LAB VIEW -->
+    <main id="view-research" class="dashboard-grid" style="display: none;">
+        <section class="kpi-row">
+            <div class="card kpi-card" style="grid-column: span 3;">
+                <h3>Model Comparison (Unified API Bridge)</h3>
+                <table style="width: 100%; margin-top: 0.5rem; text-align: left; font-size: 0.9rem;">
+                    <tr style="color: var(--health-text); border-bottom: 1px solid var(--border);">
+                        <th style="padding-bottom: 0.5rem;">Model</th>
+                        <th style="padding-bottom: 0.5rem;">AUC</th>
+                        <th style="padding-bottom: 0.5rem;">F1 Score</th>
+                        <th style="padding-bottom: 0.5rem;">Precision</th>
+                    </tr>
+                    <tr><td style="padding: 0.5rem 0;">XGBoost</td><td id="comp-xgb-auc">--</td><td id="comp-xgb-f1">--</td><td id="comp-xgb-prec">--</td></tr>
+                    <tr><td style="padding: 0.5rem 0;">Random Forest</td><td id="comp-rf-auc">--</td><td id="comp-rf-f1">--</td><td id="comp-rf-prec">--</td></tr>
+                    <tr><td style="padding: 0.5rem 0;">LightGBM</td><td id="comp-lgbm-auc">--</td><td id="comp-lgbm-f1">--</td><td id="comp-lgbm-prec">--</td></tr>
+                </table>
+            </div>
+            <div class="card kpi-card">
+                <h3>Research API State</h3>
+                <p>Unified Core</p>
+                <span class="badge success" id="research-api-status">ONLINE</span>
+            </div>
+        </section>
+
+        <section class="analysis-grid">
+            <div class="card pane-left">
+                <h2>Dataset Simulator (creditcard.csv)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Upload the anonymized bank dataset. Pull a random row to test the model against ground truth data.</p>
+                <div id="dataset-stats" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 1rem; font-family: monospace;">Secure connection to bank database established. Ready to pull live samples.</div>
+                <button id="btn-random-row" class="btn-primary" style="width: 100%; margin-bottom: 1rem;" disabled>Pull Random Transaction</button>
+                <div id="sim-details" style="display: none; padding: 1rem; border: 1px solid var(--border); border-radius: 6px;">
+                  <p><strong>Amount:</strong> <span id="sim-amount">--</span></p>
+                  <p><strong>Time:</strong> <span id="sim-time">--</span></p>
+                  <p><strong>Ground Truth:</strong> <span id="sim-truth">--</span></p>
+                </div>
+            </div>
+
+            <div class="card pane-right">
+                <h2>Full-Width SHAP Impact Chart</h2>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Click "Pull Random Transaction" to fetch a real encrypted payload from the bank database. The Zero-Trust engine will evaluate it in real-time and generate a forensic AI report.</p>
+                <div id="research-score" style="font-size:1.1rem;font-weight:600;margin-bottom:0.5rem;color:var(--health-text)"></div>
+                <div id="research-shap-chart" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.3rem;">
+                </div>
+                <div id="ai-explanation-text" style="margin-top: 1.5rem; padding: 1rem; background: rgba(2, 132, 199, 0.05); border-left: 4px solid var(--accent); font-size: 0.9rem; line-height: 1.6; display: none;"></div>
+                <div style="margin-top:2rem">
+                  <h3 style="font-size:0.95rem;margin-bottom:0.5rem;color:var(--text-muted)">Threshold Analysis (PR Curve sample)</h3>
+                  <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem">Pick the threshold where recall matches your ops team capacity. Loaded from <code>/threshold_analysis</code>.</p>
+                  <div style="max-height:180px;overflow-y:auto">
+                  <table style="font-size:0.8rem;width:100%">
+                    <thead><tr>
+                      <th>Threshold</th><th>Precision</th><th>Recall</th><th>F1</th>
+                    </tr></thead>
+                    <tbody id="threshold-table-body"><tr><td colspan="4" style="color:var(--text-muted)">Pull a random transaction to load curve</td></tr></tbody>
+                  </table>
+                  </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Batch Processing Modal -->
+    <div class="batch-modal-overlay" id="batch-modal">
+        <div class="batch-modal">
+            <h2 style="margin-bottom: 1rem; color: var(--health-text); text-shadow: var(--glow-primary);">Batch Processing Engine</h2>
+            <div style="background: rgba(2, 132, 199, 0.1); border-left: 4px solid var(--accent); padding: 1rem; margin-bottom: 1.5rem; border-radius: 0 4px 4px 0;">
+                <h4 style="color: var(--health-text); margin-bottom: 0.5rem; font-size: 0.95rem;">Required CSV Format:</h4>
+                <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 1.2rem; line-height: 1.5;">
+                    <li>Exactly <strong>30 numerical columns</strong>.</li>
+                    <li>Order: <code>Time</code>, <code>V1 through V28</code> (Encrypted Routing), <code>Amount</code>.</li>
+                    <li>The system will automatically detect and skip header rows.</li>
+                </ul>
+            </div>
+            
+            <div class="batch-progress-container">
+                <div class="batch-progress-bar" id="batch-progress"></div>
+            </div>
+            
+            <div class="batch-stats">
+                <div class="batch-stat-card">
+                    <div style="font-size: 2rem; font-weight: bold;" id="batch-total">0</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Total Processed</div>
+                </div>
+                <div class="batch-stat-card" style="border-color: var(--danger); box-shadow: var(--glow-danger);">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--danger);" id="batch-fraud">0</div>
+                    <div style="font-size: 0.8rem; color: var(--danger);">Threats Neutralized</div>
+                </div>
+                <div class="batch-stat-card" style="border-color: var(--success); box-shadow: var(--glow-success);">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--success);" id="batch-clean">0</div>
+                    <div style="font-size: 0.8rem; color: var(--success);">Clean Transactions</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button id="btn-close-batch" class="btn-primary" disabled>Processing...</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

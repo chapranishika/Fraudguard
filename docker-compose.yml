@@ -1,0 +1,42 @@
+version: "3.9"
+
+# ── PREREQUISITE ──────────────────────────────────────────────────────────────
+# Before running docker-compose up, ensure both of these exist in the project root:
+#   1. paysim_sample.csv  — 1M rows from Kaggle PaySim dataset (gitignored)
+#   2. models/            — trained artifacts from `python train.py` (gitignored)
+# Without them, the containers start but /random_sample returns 500 and
+# /predict returns 500 (no model loaded). Run train.py locally first.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  api:
+    build: .
+    container_name: fraud_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./paysim_sample.csv:/app/paysim_sample.csv
+    command: uvicorn src.api:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  streamlit:
+    build: .
+    container_name: fraud_ui
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./models:/app/models
+      - ./paysim_sample.csv:/app/paysim_sample.csv
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      - api
+
+networks:
+  default:
+    name: fraud_net
